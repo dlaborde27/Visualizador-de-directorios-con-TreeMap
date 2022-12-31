@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane fx:id="ventana2" maxHeight="740.0" maxWidth="960.0" prefHeight="740.0" prefWidth="960.0" styleClass="root" stylesheets="@../../../java/estilos.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="grupoestructuras.visualizadordedirectorios.PrincipalController">
+    <children>
+        <AnchorPane fx:id="barra" maxHeight="30.0" maxWidth="960.0" minHeight="30.0" minWidth="960.0" onMouseDragged="#moveWindow" onMousePressed="#getVector" prefHeight="30.0" prefWidth="960.0" styleClass="Bar" stylesheets="@../../../java/estilos.css" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+                <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="2.0" AnchorPane.topAnchor="0.0">
+                    <image>
+                        <Image url="@../../../java/treemap.png" />
+                    </image>
+                </ImageView>
+                <Text fill="WHITE" layoutX="60.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="VISUALIZE TREEMAP ~ Proyecto Final Grupo 4" textAlignment="CENTER" wrappingWidth="839.1999420166017">
+                    <font>
+                        <Font name="System Bold" size="18.0" />
+                    </font>
+                </Text>
+                <Button fx:id="back1" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" onAction="#quitButton" prefHeight="30.0" prefWidth="30.0" styleClass="QuitButton" stylesheets="@../../../java/estilos.css" text="X" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="2.0" AnchorPane.topAnchor="0.0">
+                    <font>
+                        <Font name="System Bold" size="15.0" />
+                    </font>
+                </Button>
+            </children>
+        </AnchorPane>
+        <AnchorPane layoutY="39.0" styleClass="Center" stylesheets="@../../../java/estilos.css" AnchorPane.bottomAnchor="684.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.4">
+            <children>
+                <Button fx:id="directory" layoutY="2.0" mnemonicParsing="false" onAction="#directoryButtonAction" prefHeight="25.0" prefWidth="174.0" styleClass="Button" stylesheets="@../../../java/estilos.css" text="SELECT DIRECTORY" textAlignment="CENTER" AnchorPane.bottomAnchor="1.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.5" />
+                <TextField fx:id="textfield" layoutX="183.0" layoutY="2.0" AnchorPane.bottomAnchor="1.0" AnchorPane.leftAnchor="175.4" AnchorPane.rightAnchor="175.4" AnchorPane.topAnchor="0.5" />
+                <Button fx:id="visualize" disable="true" layoutX="766.0" layoutY="8.0" mnemonicParsing="false" onAction="#visualizeButtonAction" prefHeight="26.0" prefWidth="174.0" styleClass="visualizeButton" stylesheets="@../../../java/estilos.css" text="VISUALIZE" AnchorPane.bottomAnchor="1.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="1.0" />
+            </children>
+        </AnchorPane>
+        <AnchorPane fx:id="center" layoutY="131.0" maxWidth="960.0" prefWidth="960.0" styleClass="Center" stylesheets="@../../../java/estilos.css" AnchorPane.bottomAnchor="34.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="57.4" />
+        <AnchorPane fx:id="base" layoutY="20.0" prefWidth="960.0" styleClass="SaveButton" stylesheets="@../../../java/estilos.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="706.4">
+            <children>
+                <Button fx:id="save" disable="true" maxHeight="30.0" mnemonicParsing="false" onAction="#saveButtonAction" prefHeight="30.0" prefWidth="960.0" styleClass="SaveButton" stylesheets="@../../../java/estilos.css" text="SAVE IMAGE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <font>
+                        <Font name="System Bold" size="15.0" />
+                    </font>
+                </Button>
+            </children>
+        </AnchorPane>
+    </children>
+</AnchorPane>
