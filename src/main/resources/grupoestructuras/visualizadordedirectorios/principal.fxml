@@ -22,18 +22,13 @@
                         <Font name="System Bold" size="18.0" />
                     </font>
                 </Text>
-                <Button fx:id="back1" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" onAction="#quitButton" prefHeight="30.0" prefWidth="30.0" styleClass="QuitButton" stylesheets="@../../../java/estilos.css" text="X" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="2.0" AnchorPane.topAnchor="0.0">
-                    <font>
-                        <Font name="System Bold" size="15.0" />
-                    </font>
-                </Button>
             </children>
         </AnchorPane>
         <AnchorPane layoutY="39.0" styleClass="Center" stylesheets="@../../../java/estilos.css" AnchorPane.bottomAnchor="684.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.4">
             <children>
-                <Button fx:id="directory" layoutY="2.0" mnemonicParsing="false" onAction="#directoryButtonAction" prefHeight="25.0" prefWidth="174.0" styleClass="Button" stylesheets="@../../../java/estilos.css" text="SELECT DIRECTORY" textAlignment="CENTER" AnchorPane.bottomAnchor="1.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.5" />
-                <TextField fx:id="textfield" layoutX="183.0" layoutY="2.0" AnchorPane.bottomAnchor="1.0" AnchorPane.leftAnchor="175.4" AnchorPane.rightAnchor="175.4" AnchorPane.topAnchor="0.5" />
-                <Button fx:id="visualize" disable="true" layoutX="766.0" layoutY="8.0" mnemonicParsing="false" onAction="#visualizeButtonAction" prefHeight="26.0" prefWidth="174.0" styleClass="visualizeButton" stylesheets="@../../../java/estilos.css" text="VISUALIZE" AnchorPane.bottomAnchor="1.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="1.0" />
+                <Button fx:id="directory" layoutY="2.0" mnemonicParsing="false" onAction="#seleccionarCarpeta" prefHeight="25.0" prefWidth="174.0" styleClass="Button" stylesheets="@../../../java/estilos.css" text="Seleccionar carpeta" textAlignment="CENTER" AnchorPane.bottomAnchor="1.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.5" />
+                <TextField fx:id="rutaDeCarpeta" layoutX="183.0" layoutY="2.0" AnchorPane.bottomAnchor="1.0" AnchorPane.leftAnchor="175.4" AnchorPane.rightAnchor="175.4" AnchorPane.topAnchor="0.5" />
+                <Button fx:id="visualizador" disable="true" layoutX="766.0" layoutY="8.0" mnemonicParsing="false" onAction="#visualizeButtonAction" prefHeight="26.0" prefWidth="174.0" styleClass="visualizeButton" stylesheets="@../../../java/estilos.css" text="Visualizar" AnchorPane.bottomAnchor="1.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="1.0" />
             </children>
         </AnchorPane>
         <AnchorPane fx:id="center" layoutY="131.0" maxWidth="960.0" prefWidth="960.0" styleClass="Center" stylesheets="@../../../java/estilos.css" AnchorPane.bottomAnchor="34.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="57.4" />

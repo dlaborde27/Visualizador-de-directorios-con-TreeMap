@@ -1,9 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/javafx/FXMLController.java to edit this template
- */
+
 package grupoestructuras.visualizadordedirectorios;
 
+import Modelo.Arbol;
 import Modelo.Carpeta;
 import java.io.File;
 import java.io.IOException;
@@ -41,11 +39,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-/**
- * FXML Controller class
- *
- * @author Pc
- */
+
 public class PrincipalController implements Initializable {
 
     @FXML
@@ -53,31 +47,25 @@ public class PrincipalController implements Initializable {
     @FXML
     private AnchorPane barra;
     @FXML
-    private Button back1;
-    @FXML
     private Button directory;
-    @FXML
-    private TextField textfield;
-    @FXML
-    private Button visualize;
     @FXML
     private AnchorPane center;
     @FXML
     private AnchorPane base;
     @FXML
     private Button save;
-
+    @FXML
+    private TextField rutaDeCarpeta;
+    @FXML
+    private Button visualizador;
     LinkedList<Carpeta> treeMap;
-
     private double xOffset = 0;
     private double yOffset = 0;
+    private final double valorDeEquivalenciaDeUnKiloByteAByte = 1024.00;
     
     @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        // TODO
-    }    
+    public void initialize(URL url, ResourceBundle rb) {}    
 
-    @FXML
     private void quitButton(ActionEvent event) {
         Stage stage = (Stage) save.getScene().getWindow();
         stage.close();
@@ -97,29 +85,30 @@ public class PrincipalController implements Initializable {
     }
 
     @FXML
-    private void directoryButtonAction(ActionEvent event) {
-        DirectoryChooser dc = new DirectoryChooser();
-        dc.setInitialDirectory(new File("src"));
-
-        File selectedDir = dc.showDialog(null);
-
-        if (selectedDir == null) {
-            System.out.println("Not directory selected");
+    private void seleccionarCarpeta(ActionEvent event) {
+        DirectoryChooser selectorDeCarpeta = new DirectoryChooser();
+        selectorDeCarpeta.setInitialDirectory(new File("C:\\"));
+        File carpetaElegida = selectorDeCarpeta.showDialog(null);
+        if (carpetaElegida == null) {
+            System.out.println("No se ha seleccionado ninguna carpeta");
         } else {
-            double size = 0;
-            Carpeta dir = new Carpeta(selectedDir.getName());
-            dir.setTamaño(redondeo(recorrerDirectorio(selectedDir.listFiles(), size, dir), 2));
-            textfield.setText(selectedDir.getAbsolutePath());
-            visualize.setDisable(false);
+            establecerRutaEnTextField(carpetaElegida);
+            Carpeta carpeta = new Carpeta(carpetaElegida.getName());
+            carpeta.setTamaño(redondeo(recorrerCarpeta(carpetaElegida.listFiles(), 0, carpeta), 2));
             treeMap = new LinkedList<>();
-            treeMap.add(dir);
+            treeMap.add(carpeta);
             System.out.println("---------- TreeMap ---------");
             iterar(treeMap, 0);
         }
         center.getChildren().clear();
         save.setDisable(true);
     }
-
+    
+    private void establecerRutaEnTextField(File carpetaElegida){
+        rutaDeCarpeta.setText(carpetaElegida.getAbsolutePath());
+        visualizador.setDisable(false);
+    }
+    
     @FXML
     private void visualizeButtonAction(ActionEvent event) {
         VBox container = new VBox();
@@ -131,6 +120,7 @@ public class PrincipalController implements Initializable {
 
         Rectangle graphicSizeTotal = new Rectangle();
         graphicSizeTotal.setWidth(960);
+        
         graphicSizeTotal.setHeight(25);
         graphicSizeTotal.setFill(Color.CORAL);
         graphicSizeTotal.setStroke(Color.WHITE);
@@ -176,32 +166,15 @@ public class PrincipalController implements Initializable {
     
     
     
-    public double redondeo(double tam, int decimales) {
-        return new BigDecimal(tam)
-                .setScale(decimales, RoundingMode.HALF_EVEN).doubleValue();
+    public double redondeo(double numeroCompleto, int decimales) {
+        return new BigDecimal(numeroCompleto).setScale(decimales, RoundingMode.HALF_EVEN).doubleValue();
     }
-
-    public String identar(int num) {
-        char[] carac = new char[num];
-        String iden = "";
-        if (num > 0) {
-            for (int i = 0; i < num; i++) {
-                carac[i] = '-';
-            }
-            iden = new String(carac);
-        } else {
-            return iden;
-        }
-
-        return iden;
-    }
-
-    public void iterar(LinkedList<Carpeta> treeMap, int num) {
-        Iterator it = treeMap.iterator();
+    
+    private void iterar(LinkedList<Carpeta> treeMap, int num) {
+        Iterator<Carpeta> it = treeMap.iterator();
         while (it.hasNext()) {
-            Carpeta next = (Carpeta) it.next();
-
-            if (next.getCarpetas().size() > 0) {
+            Carpeta next = it.next();
+            if (!next.getCarpetas().isEmpty()) {
                 System.out.println(identar(num) + "Carpeta: " + next.getNombre() + "| size: " + next.getTamaño());
                 iterar(next.getCarpetas(), num + 2);
             } else {
@@ -210,26 +183,39 @@ public class PrincipalController implements Initializable {
         }
     }
     
-    public boolean isFile(File file) {
-        return file.isFile();
+    private String identar(int num) {
+        String identacion = "";
+        if (num > 0) {
+            for (int i = 0; i < num; i++) {
+                identacion += "-";
+            }
+        }
+        return identacion;
     }
-
-    public double recorrerDirectorio(File[] content, double total, Carpeta dirt) {
-        for (File file : content) {
-            if (isFile(file)) {
-                total += redondeo(file.length() / 1024.0, 2);
-                Carpeta direct = new Carpeta(file.getName(), redondeo(file.length() / 1024.0, 2));
-                dirt.getCarpetas().add(direct);
-            } else {
-                double tam = 0.0;
-                Carpeta dir = new Carpeta(file.getName());
-                double size = redondeo(recorrerDirectorio(file.listFiles(), tam, dir), 2);
-                dir.setTamaño(size);
-                dirt.getCarpetas().add(dir);
+    
+    public double recorrerCarpeta(File[] contenidoDeCarpeta, double total, Carpeta carpetaPrincipal) {
+        for (File file : contenidoDeCarpeta) {
+            if (file.isDirectory()) {
+                double tamaño = 0.00;
+                Carpeta carpeta = new Carpeta(file.getName());
+                double size = redondeo(recorrerCarpeta(file.listFiles(), tamaño, carpeta), 2);
+                carpeta.setTamaño(size);
+                carpetaPrincipal.getCarpetas().add(carpeta);
                 total += size;
+            } else {
+                double pesoDelArchivoEnBytes = file.length();
+                double conversion = conversionDeBytesAkiloBytes(pesoDelArchivoEnBytes);
+                double redondeoDeConversion = redondeo(conversion, 2);
+                total += redondeoDeConversion;
+                Carpeta carpeta = new Carpeta(file.getName(), redondeoDeConversion);
+                carpetaPrincipal.getCarpetas().add(carpeta);
             }
         }
         return total;
+    }
+    
+    private double conversionDeBytesAkiloBytes(double bytes){
+        return bytes / valorDeEquivalenciaDeUnKiloByteAByte;
     }
 
     public void setLabelSize(Label lb, double amount) {
@@ -255,7 +241,7 @@ public class PrincipalController implements Initializable {
         return randomColor;
     }
 
-    public double getSize(File dir) {
+    /*public double getSize(File dir) {
         double size = 0.0;
         File[] files = dir.listFiles();
         for (File f : files) {
@@ -269,48 +255,91 @@ public class PrincipalController implements Initializable {
             }
         }
         return size;
-    }
+    }*/
     
     public void Painting(Carpeta directory, Pane pane, double width, double height, String type) {
         LinkedList<Carpeta> selected = directory.getCarpetas();
-        double size = directory.getTamaño();
-        selected.forEach((f) -> {
-            if (!f.esCarpeta() && type.equals("h")) {
-                double fact1 = width * (f.getTamaño() / size);
+        double size = directory.getTamaño(); 
+        selected.forEach((elementoDeCarpeta) -> {
+            if (!elementoDeCarpeta.esCarpeta() && type.equals("h")) {
+                double fact1 = width * (elementoDeCarpeta.getTamaño() / size);
                 double fact2 = height;
                 Rectangle shape = new Rectangle(fact1, fact2);
                 shape.setFill(getRandomColor());
                 shape.setStrokeType(StrokeType.INSIDE);
                 shape.setStroke(Color.WHITE);
                 VBox temp = new VBox();
+                
                 temp.getChildren().addAll(shape);
                 pane.getChildren().add(temp);
-            } else if (!f.esCarpeta() && type.equals("v")) {
+                shape.setOnMouseClicked(event -> {
+                       
+                       Alert alert=new Alert(AlertType.INFORMATION);
+                       alert.setTitle("Informacion");
+                       alert.setContentText("Nombre del archivo: "+elementoDeCarpeta.getNombre()+"\n"+"Peso en megabytes: "+elementoDeCarpeta.getTamaño());
+                       alert.setHeaderText(null);
+                       alert.showAndWait();
+
+                   });
+                
+            } else if (!elementoDeCarpeta.esCarpeta() && type.equals("v")) {
                 double fact1 = width;
-                double fact2 = height * (f.getTamaño() / size);
+                double fact2 = height * (elementoDeCarpeta.getTamaño() / size);
                 Rectangle shape = new Rectangle(fact1, fact2);
                 shape.setFill(getRandomColor());
                 shape.setStrokeType(StrokeType.INSIDE);
                 shape.setStroke(Color.WHITE);
                 HBox temp = new HBox();
+                
                 temp.getChildren().addAll(shape);
                 pane.getChildren().add(temp);
-            } else if (f.esCarpeta() && type.equals("h")) {
-                double size2 = f.getTamaño();
+                
+                shape.setOnMouseClicked(event -> {
+                       
+                       Alert alert=new Alert(AlertType.INFORMATION);
+                       alert.setTitle("Informacion");
+                       alert.setContentText("Nombre del archivo: "+elementoDeCarpeta.getNombre()+"\n"+"Peso en megabytes: "+elementoDeCarpeta.getTamaño());
+                       alert.setHeaderText(null);
+                       alert.showAndWait();
+
+                   });
+            } else if (elementoDeCarpeta.esCarpeta() && type.equals("h")) {
+                double size2 = elementoDeCarpeta.getTamaño();
                 VBox box = new VBox();
-                box.setMaxWidth(width * (size2 / size));
+                box.setMaxWidth(width * (size2 / size)); 
                 box.setMaxHeight(height);
-                Painting(f, box, box.getMaxWidth(), box.getMaxHeight(), "v");
-                pane.getChildren().add(box);
-            } else if (f.esCarpeta() && type.equals("v")) {
-                double size2 = f.getTamaño();
+                Pane panel = new Pane();
+                
+                
+                Label lb = new Label(elementoDeCarpeta.getNombre()+elementoDeCarpeta.getTamaño());
+                lb.setStyle("-fx-background-color: transparent");
+                
+                
+                
+                Painting(elementoDeCarpeta, box, box.getMaxWidth(), box.getMaxHeight(), "v");
+                panel.getChildren().addAll(box,lb);
+                pane.getChildren().addAll(panel);
+                
+                
+            } else if (elementoDeCarpeta.esCarpeta() && type.equals("v")) {
+                double size2 = elementoDeCarpeta.getTamaño();
                 HBox box = new HBox();
+                Pane panel = new Pane();
+                
+                
+                Label lb = new Label(elementoDeCarpeta.getNombre()+ " " +elementoDeCarpeta.getTamaño());
+                lb.setStyle("-fx-background-color: transparent");
+                
                 box.setMaxWidth(width);
                 box.setMaxHeight(height * (size2 / size));
-                Painting(f, box, box.getMaxWidth(), box.getMaxHeight(), "h");
-                pane.getChildren().add(box);
+                Painting(elementoDeCarpeta, box, box.getMaxWidth(), box.getMaxHeight(), "h");
+                panel.getChildren().addAll(box,lb);
+                pane.getChildren().addAll(panel);
             }
         });
     }
+
+    
+    
     
 }
