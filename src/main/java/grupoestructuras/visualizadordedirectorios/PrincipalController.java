@@ -2,19 +2,13 @@
 package grupoestructuras.visualizadordedirectorios;
 
 import Modelo.Arbol;
+import Modelo.BuilderArbol;
 import Modelo.Carpeta;
+import Modelo.Nodo;
 import java.io.File;
-import java.io.IOException;
-import java.lang.System.Logger;
-import java.lang.System.Logger.Level;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.net.URL;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
@@ -25,10 +19,8 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -37,7 +29,6 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeType;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 
 public class PrincipalController implements Initializable {
@@ -58,10 +49,10 @@ public class PrincipalController implements Initializable {
     private TextField rutaDeCarpeta;
     @FXML
     private Button visualizador;
-    LinkedList<Carpeta> treeMap;
+    Arbol<Carpeta> treeMap;
     private double xOffset = 0;
     private double yOffset = 0;
-    private final double valorDeEquivalenciaDeUnKiloByteAByte = 1024.00;
+    
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {}    
@@ -89,24 +80,49 @@ public class PrincipalController implements Initializable {
         DirectoryChooser selectorDeCarpeta = new DirectoryChooser();
         selectorDeCarpeta.setInitialDirectory(new File("C:\\"));
         File carpetaElegida = selectorDeCarpeta.showDialog(null);
-        if (carpetaElegida == null) {
-            System.out.println("No se ha seleccionado ninguna carpeta");
-        } else {
-            establecerRutaEnTextField(carpetaElegida);
-            Carpeta carpeta = new Carpeta(carpetaElegida.getName());
-            carpeta.setTamaño(redondeo(recorrerCarpeta(carpetaElegida.listFiles(), 0, carpeta), 2));
-            treeMap = new LinkedList<>();
-            treeMap.add(carpeta);
-            System.out.println("---------- TreeMap ---------");
-            iterar(treeMap, 0);
-        }
+        establecerRutaEnTextField(carpetaElegida);
+        contruirTreeMap(carpetaElegida);
+        mostarTreeMapPorConsola();
         center.getChildren().clear();
         save.setDisable(true);
+    }
+    
+    private void contruirTreeMap(File carpetaElegida){
+        BuilderArbol b = new BuilderArbol();
+        this.treeMap = b.construirArbol(carpetaElegida);
+    }
+    
+    private void mostarTreeMapPorConsola(){
+        System.out.println("---------- TreeMap ---------");
+        iterar(this.treeMap, 0);
     }
     
     private void establecerRutaEnTextField(File carpetaElegida){
         rutaDeCarpeta.setText(carpetaElegida.getAbsolutePath());
         visualizador.setDisable(false);
+    }
+    
+    private void iterar(Arbol<Carpeta> treeMap, int num) {
+        Nodo<Carpeta> nodoPadre = treeMap.root;
+        for(Arbol<Carpeta> h : nodoPadre.getHijos()){
+            Carpeta carpetaEnNodo = h.root.contenido;
+            if(h.root.getHijos().isEmpty()){
+                System.out.println(identar(num) + "Archivo: " + carpetaEnNodo.getNombre() + "| size: " + carpetaEnNodo.getTamaño());
+            }else{
+                System.out.println(identar(num) + "Carpeta: " + carpetaEnNodo.getNombre() + "| size: " + carpetaEnNodo.getTamaño());
+                iterar(h, num + 2);
+            }
+        }
+    }
+    
+    private String identar(int num) {
+        String identacion = "";
+        if (num > 0) {
+            for (int i = 0; i < num; i++) {
+                identacion += "-";
+            }
+        }
+        return identacion;
     }
     
     @FXML
@@ -126,11 +142,11 @@ public class PrincipalController implements Initializable {
         graphicSizeTotal.setStroke(Color.WHITE);
 
         Label extensionSize = new Label();
-        setLabelSize(extensionSize, treeMap.getFirst().getTamaño());
+        setTamañoDeLabel(extensionSize, treeMap.root.contenido);
 
         SizeTotal.getChildren().addAll(graphicSizeTotal, extensionSize);
         container.getChildren().addAll(SizeTotal, graphics);
-        Painting(treeMap.getFirst(), graphics, 960.0, 650.0, "h");
+        Painting(this.treeMap, graphics, 960.0, 650.0, "h");
         center.getChildren().addAll(container);
         save.setDisable(false);
     }
@@ -164,72 +180,9 @@ public class PrincipalController implements Initializable {
         }*/
     }
     
-    
-    
-    public double redondeo(double numeroCompleto, int decimales) {
-        return new BigDecimal(numeroCompleto).setScale(decimales, RoundingMode.HALF_EVEN).doubleValue();
-    }
-    
-    private void iterar(LinkedList<Carpeta> treeMap, int num) {
-        Iterator<Carpeta> it = treeMap.iterator();
-        while (it.hasNext()) {
-            Carpeta next = it.next();
-            if (!next.getCarpetas().isEmpty()) {
-                System.out.println(identar(num) + "Carpeta: " + next.getNombre() + "| size: " + next.getTamaño());
-                iterar(next.getCarpetas(), num + 2);
-            } else {
-                System.out.println(identar(num) + "Archivo: " + next.getNombre() + "| size: " + next.getTamaño());
-            }
-        }
-    }
-    
-    private String identar(int num) {
-        String identacion = "";
-        if (num > 0) {
-            for (int i = 0; i < num; i++) {
-                identacion += "-";
-            }
-        }
-        return identacion;
-    }
-    
-    public double recorrerCarpeta(File[] contenidoDeCarpeta, double total, Carpeta carpetaPrincipal) {
-        for (File file : contenidoDeCarpeta) {
-            if (file.isDirectory()) {
-                double tamaño = 0.00;
-                Carpeta carpeta = new Carpeta(file.getName());
-                double size = redondeo(recorrerCarpeta(file.listFiles(), tamaño, carpeta), 2);
-                carpeta.setTamaño(size);
-                carpetaPrincipal.getCarpetas().add(carpeta);
-                total += size;
-            } else {
-                double pesoDelArchivoEnBytes = file.length();
-                double conversion = conversionDeBytesAkiloBytes(pesoDelArchivoEnBytes);
-                double redondeoDeConversion = redondeo(conversion, 2);
-                total += redondeoDeConversion;
-                Carpeta carpeta = new Carpeta(file.getName(), redondeoDeConversion);
-                carpetaPrincipal.getCarpetas().add(carpeta);
-            }
-        }
-        return total;
-    }
-    
-    private double conversionDeBytesAkiloBytes(double bytes){
-        return bytes / valorDeEquivalenciaDeUnKiloByteAByte;
-    }
-
-    public void setLabelSize(Label lb, double amount) {
+    public void setTamañoDeLabel(Label lb, Carpeta carpeta) {
         lb.setStyle("-fx-font-weight: bold; -fx-font-size: 15");
-        DecimalFormat two = new DecimalFormat("0.00");
-        if (amount < 1024) {
-            lb.setText("(" + amount + " KB" + ")");
-        } else if (amount > 1024 && amount < 1024 * 1024) {
-            lb.setText("(" + two.format(amount / 1024) + " MB" + ")");
-        } else if (amount > 1024 * 1024 && amount < 1024 * 1024) {
-            lb.setText("(" + two.format(amount / 1024 * 1024) + " GB" + ")");
-        } else {
-            lb.setText("(" + two.format(amount / 1024 * 1024 * 1024) + " TB" + ")");
-        }
+        lb.setText("Carpeta : "+ carpeta.getNombre() +" (" + carpeta.getTamaño() + " KB" + ")");
     }
 
     public Color getRandomColor() {
@@ -241,7 +194,7 @@ public class PrincipalController implements Initializable {
         return randomColor;
     }
 
-    /*public double getSize(File dir) {
+    public double getSize(File dir) {
         double size = 0.0;
         File[] files = dir.listFiles();
         for (File f : files) {
@@ -255,91 +208,73 @@ public class PrincipalController implements Initializable {
             }
         }
         return size;
-    }*/
+    }
     
-    public void Painting(Carpeta directory, Pane pane, double width, double height, String type) {
-        LinkedList<Carpeta> selected = directory.getCarpetas();
-        double size = directory.getTamaño(); 
-        selected.forEach((elementoDeCarpeta) -> {
-            if (!elementoDeCarpeta.esCarpeta() && type.equals("h")) {
-                double fact1 = width * (elementoDeCarpeta.getTamaño() / size);
-                double fact2 = height;
-                Rectangle shape = new Rectangle(fact1, fact2);
-                shape.setFill(getRandomColor());
-                shape.setStrokeType(StrokeType.INSIDE);
-                shape.setStroke(Color.WHITE);
-                VBox temp = new VBox();
-                
-                temp.getChildren().addAll(shape);
-                pane.getChildren().add(temp);
-                shape.setOnMouseClicked(event -> {
-                       
-                       Alert alert=new Alert(AlertType.INFORMATION);
-                       alert.setTitle("Informacion");
-                       alert.setContentText("Nombre del archivo: "+elementoDeCarpeta.getNombre()+"\n"+"Peso en megabytes: "+elementoDeCarpeta.getTamaño());
-                       alert.setHeaderText(null);
-                       alert.showAndWait();
+    public void Painting(Arbol<Carpeta>arbol, Pane pane, double width, double height, String orientacion) {
+        Nodo<Carpeta> nodoArbol = arbol.root;
+        List<Arbol<Carpeta>> selected = nodoArbol.getHijos();
+        double tamano = nodoArbol.contenido.getTamaño();
+        
+        for (Arbol<Carpeta> archivo : selected) {
+            
+            Boolean esCarpeta = archivo.root.esHoja();
+            Boolean esHorizontal = orientacion.equals("h");
+            
+            if (!esCarpeta && esHorizontal) {
+                double valor = width * (archivo.root.contenido.getTamaño() / tamano);
+                agregarRectangulo(valor, height, pane, archivo.root.contenido);
 
-                   });
-                
-            } else if (!elementoDeCarpeta.esCarpeta() && type.equals("v")) {
-                double fact1 = width;
-                double fact2 = height * (elementoDeCarpeta.getTamaño() / size);
-                Rectangle shape = new Rectangle(fact1, fact2);
-                shape.setFill(getRandomColor());
-                shape.setStrokeType(StrokeType.INSIDE);
-                shape.setStroke(Color.WHITE);
-                HBox temp = new HBox();
-                
-                temp.getChildren().addAll(shape);
-                pane.getChildren().add(temp);
-                
-                shape.setOnMouseClicked(event -> {
-                       
-                       Alert alert=new Alert(AlertType.INFORMATION);
-                       alert.setTitle("Informacion");
-                       alert.setContentText("Nombre del archivo: "+elementoDeCarpeta.getNombre()+"\n"+"Peso en megabytes: "+elementoDeCarpeta.getTamaño());
-                       alert.setHeaderText(null);
-                       alert.showAndWait();
+            } else if (!esCarpeta && !esHorizontal) {
+                double valor = height * (archivo.root.contenido.getTamaño() / tamano);
 
-                   });
-            } else if (elementoDeCarpeta.esCarpeta() && type.equals("h")) {
-                double size2 = elementoDeCarpeta.getTamaño();
+                agregarRectangulo(width, valor, pane, archivo.root.contenido);
+
+            } else if (esCarpeta && esHorizontal) {
+
                 VBox box = new VBox();
-                box.setMaxWidth(width * (size2 / size)); 
+                box.setMaxWidth(width * (archivo.root.contenido.getTamaño() / tamano));
                 box.setMaxHeight(height);
                 Pane panel = new Pane();
-                
-                
-                Label lb = new Label(elementoDeCarpeta.getNombre()+elementoDeCarpeta.getTamaño());
-                lb.setStyle("-fx-background-color: transparent");
-                
-                
-                
-                Painting(elementoDeCarpeta, box, box.getMaxWidth(), box.getMaxHeight(), "v");
-                panel.getChildren().addAll(box,lb);
+
+                Painting(archivo, box, box.getMaxWidth(), box.getMaxHeight(), "v");
+                panel.getChildren().addAll(box);
                 pane.getChildren().addAll(panel);
-                
-                
-            } else if (elementoDeCarpeta.esCarpeta() && type.equals("v")) {
-                double size2 = elementoDeCarpeta.getTamaño();
+
+            } else {
                 HBox box = new HBox();
                 Pane panel = new Pane();
-                
-                
-                Label lb = new Label(elementoDeCarpeta.getNombre()+ " " +elementoDeCarpeta.getTamaño());
-                lb.setStyle("-fx-background-color: transparent");
-                
+                //Label lb = new Label(archivo.root.contenido.getNombre() + " " + archivo.root.contenido.getTamaño());
+                //lb.setStyle("-fx-background-color: transparent");
+
                 box.setMaxWidth(width);
-                box.setMaxHeight(height * (size2 / size));
-                Painting(elementoDeCarpeta, box, box.getMaxWidth(), box.getMaxHeight(), "h");
-                panel.getChildren().addAll(box,lb);
+                box.setMaxHeight(height * (archivo.root.contenido.getTamaño() / tamano));
+                Painting(archivo, box, box.getMaxWidth(), box.getMaxHeight(), "h");
+                panel.getChildren().addAll(box);
                 pane.getChildren().addAll(panel);
             }
-        });
+        }
     }
 
-    
-    
+    public void agregarAletar(Carpeta carpeta) {
+        Alert a = new Alert(AlertType.INFORMATION);
+        a.setTitle("Informacion");
+        a.setContentText("Nombre del archivo: " + carpeta.getNombre() + "\n" + "Peso en megabytes: " + carpeta.getTamaño());
+        a.setHeaderText(null);
+        a.showAndWait();
+
+    }
+
+    public void agregarRectangulo(Double v1, Double v2, Pane panel, Carpeta carpeta) {
+        Rectangle shape = new Rectangle(v1, v2);
+        shape.setFill(getRandomColor());
+        shape.setStrokeType(StrokeType.INSIDE);
+        shape.setStroke(Color.WHITE);
+        VBox temp = new VBox();
+        temp.getChildren().addAll(shape);
+        panel.getChildren().add(temp);
+        shape.setOnMouseClicked(event -> {
+            agregarAletar(carpeta);
+        });
+    }
     
 }
